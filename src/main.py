@@ -1,5 +1,10 @@
+from typing import cast
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
+from slowapi.extension import _rate_limit_exceeded_handler
+from core.limiter import limiter
 from core.exceptions import AppException
 from contextlib import asynccontextmanager
 from core.dbcontext import init_db
@@ -7,18 +12,15 @@ from auth.routes import auth_router
 from books.router import book_router
 from core.s3_client import close_s3_client, init_s3_client
 from files.routes import file_router
+from starlette.types import ExceptionHandler
 @asynccontextmanager
-async def life_span(app:FastAPI):
-    print(f"server is starting")
+async def life_span(app: FastAPI):
+    print("server is starting")
     await init_db()
-    init_s3_client()  
-
-
+    init_s3_client()
     yield
-
-
-    print("server stoped")
-    close_s3_client()  # limpia al cerrar
+    print("server stopped")
+    close_s3_client()
 
 
 version ="V1"
@@ -28,7 +30,8 @@ app = FastAPI(
     description="Esto es una descripcion",
     lifespan = life_span
 )
-
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded,     cast(ExceptionHandler, _rate_limit_exceeded_handler))
 @app.exception_handler(AppException)
 async def app_exception_handler(request: Request, exc: AppException):
     return JSONResponse(

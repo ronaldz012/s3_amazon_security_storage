@@ -5,10 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from core.models import Character
-from core.exceptions import InternalException
+from core.exceptions import AppException, InternalException
 from core.s3_client import get_s3_client
 from config import settings
-
+ALLOWED_CONTENT_TYPES = {"image/png", "image/jpeg", "image/webp", "application/pdf"}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 class FileService:
     def __init__(self, session: AsyncSession):
         self.s3 = get_s3_client()
@@ -37,6 +38,12 @@ class FileService:
         original_filename: str,
         content_type: str,
     ) -> Character:
+        
+        if content_type not in ALLOWED_CONTENT_TYPES:
+            raise AppException("Tipo de archivo no permitido", status_code=415)
+    
+        if len(file_bytes) > MAX_FILE_SIZE:
+            raise AppException("Archivo demasiado grande", status_code=413)
         s3_key = self._build_key(owner_id, original_filename)
 
         try:

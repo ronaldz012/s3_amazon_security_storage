@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from typing import Annotated
 
+from core.limiter import limiter
 from .dependencies import get_auth_service
 from .services.auth_service import AuthService
 from .schemas import LoginDTO, LoginSuccessDTO, RegisterDTO
@@ -26,7 +27,8 @@ async def register(dto: RegisterDTO, service: ServiceDep):
     response_model=LoginSuccessDTO, 
     status_code=status.HTTP_200_OK
 )
-async def login(dto: LoginDTO, service: ServiceDep):
+@limiter.limit("1/minute")
+async def login(request: Request,dto: LoginDTO, service: ServiceDep):
     """
     Autentica al usuario y devuelve el token de acceso.
     """
