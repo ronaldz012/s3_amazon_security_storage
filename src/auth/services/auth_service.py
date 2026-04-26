@@ -10,13 +10,12 @@ from sqlalchemy.exc import IntegrityError
 from jose import jwt
 from passlib.context import CryptContext
 
-from shared.model import User
-from .schemas import LoginDTO, LoginSuccessDTO, RegisterDTO, UserResponseDTO
-from shared.app_exception import AppException, NotFoundException
+from config import settings
+from core.models import User
+from ..schemas import LoginDTO, LoginSuccessDTO, RegisterDTO, UserResponseDTO
+from core.exceptions import AppException, NotFoundException
 
-SECRET_KEY = "super-secret-key-muy-larga-y-segura"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -33,9 +32,9 @@ class AuthService:
 
     def _create_access_token(self, user_id: str) -> str:
         now = datetime.now(timezone.utc)
-        expire = now + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         payload = {"sub": str(user_id), "iat": now, "exp": expire}
-        return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+        return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     
 
 

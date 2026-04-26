@@ -1,4 +1,5 @@
 import asyncpg
+from fastapi import Depends
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel, create_engine
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
@@ -6,7 +7,7 @@ from sqlalchemy import text
 from sqlmodel.ext.asyncio.session import AsyncSession
 from config import settings
 from sqlalchemy.ext.asyncio import async_sessionmaker
-from typing import AsyncGenerator
+from typing import Annotated, AsyncGenerator
 
 
 # Para crear la DB usamos asyncpg directamente (no SQLAlchemy)
@@ -43,7 +44,7 @@ engine = create_async_engine(
 async def init_db():
     await create_database_if_not_exists()
     async with engine.begin() as conn:
-        from .model import Base  # importas Base, no SQLModel
+        from .models import Base  # importas Base, no SQLModel
         await conn.run_sync(Base.metadata.create_all)
         print("Tablas creadas o ya existentes.")
 
@@ -57,3 +58,5 @@ async_session_maker = async_sessionmaker(
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
         yield session
+
+SessionDep = Annotated[AsyncSession, Depends(get_session)]

@@ -5,9 +5,9 @@ from sqlmodel import select, text
 from sqlalchemy.exc import IntegrityError
 
 from sqlmodel.ext.asyncio.session import AsyncSession
-from shared.model import Book
+from core.models import Book
 from books.schemas import BookDto, CreateBookDto
-from shared.app_exception import AppException, ConflictException, InternalException, NotFoundException
+from core.exceptions import AppException, ConflictException, InternalException, NotFoundException
 
 logger = logging.getLogger(__name__)
 

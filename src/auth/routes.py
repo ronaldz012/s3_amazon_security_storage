@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, status
 from typing import Annotated
 
 from .dependencies import get_auth_service
-from .service import AuthService
+from .services.auth_service import AuthService
 from .schemas import LoginDTO, LoginSuccessDTO, RegisterDTO
 
 # Definición del tipo de dependencia para reutilizar

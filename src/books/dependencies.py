@@ -1,7 +1,7 @@
 from fastapi import Depends
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from shared.dbcontext import get_session
+from core.dbcontext import get_session
 from books.service import BookService
 
 

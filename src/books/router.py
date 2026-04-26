@@ -4,9 +4,9 @@ from typing import Annotated
 from books.dependencies import BookService, get_book_service
 from books.schemas import BookDto, CreateBookDto
 
-ServiceDep = Annotated[BookService, Depends(get_book_service)]
+ServiceDep = Annotated[BookService, Depends(dependency=get_book_service)]
 
-book_router = APIRouter(tags=["Books"])
+book_router = APIRouter(tags=["Books"],prefix="/book")
 
 @book_router.post("", status_code=201, response_model=BookDto)
 async def save_book(data: CreateBookDto, service: ServiceDep):
