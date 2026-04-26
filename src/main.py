@@ -2,8 +2,9 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from shared.app_exception import AppException
 from contextlib import asynccontextmanager
-from shared.model import Book
 from shared.dbcontext import init_db
+from auth.routes import auth_router
+from books.router import book_router
 
 @asynccontextmanager
 async def life_span(app:FastAPI):
@@ -19,7 +20,6 @@ app = FastAPI(
     description="Esto es una descripcion",
     lifespan = life_span
 )
-from books.router import book_router
 
 @app.exception_handler(AppException)
 async def app_exception_handler(request: Request, exc: AppException):
@@ -27,7 +27,8 @@ async def app_exception_handler(request: Request, exc: AppException):
         status_code=exc.status_code,
         content={"detail": exc.message}
     )
-app.include_router(book_router, prefix="/api/book",)
+app.include_router(book_router, prefix="/api/book")
+app.include_router(auth_router)
 
 
 ##EXCEPTION EXAMPLE

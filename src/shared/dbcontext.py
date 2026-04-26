@@ -42,10 +42,9 @@ engine = create_async_engine(
 
 async def init_db():
     await create_database_if_not_exists()
-
     async with engine.begin() as conn:
-        from .model import Book
-        await conn.run_sync(SQLModel.metadata.create_all)
+        from .model import Base  # importas Base, no SQLModel
+        await conn.run_sync(Base.metadata.create_all)
         print("Tablas creadas o ya existentes.")
 
 

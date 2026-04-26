@@ -1,10 +1,23 @@
+import uuid
+from datetime import datetime, timezone
 from typing import Optional
-from sqlmodel import SQLModel, Field
+from sqlalchemy import String, DateTime, Boolean, select
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-class Book(SQLModel, table=True):
-    __tablename__ = "books"  # type: ignore
-    id: Optional[int] = Field(default=None, primary_key=True)
-    title: str = Field(max_length=255, nullable=False, index=True)
-    description: str = Field(default="",sa_column_kwargs={"name": "description"}  )
+class Base(DeclarativeBase):
+    pass
 
+class Book(Base):
+    __tablename__ = "books"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(255), index=True, nullable=False)
+    description: Mapped[str] = mapped_column(String, default="")
 
+class User(Base):
+    __tablename__ = "users"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    username: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
+    email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True)
